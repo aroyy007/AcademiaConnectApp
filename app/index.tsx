@@ -13,6 +13,7 @@ import {
   Alert,
   AccessibilityInfo,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { router } from 'expo-router';
 import { COLORS } from '@/constants/colors';
 import { FONT, FONT_SIZE } from '@/constants/typography';
@@ -200,22 +201,43 @@ export default function WelcomeScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       
-      {/* Background Image with Selective Blur */}
+      {/* Background Image with Cross-Platform Blur */}
       <Animated.View 
         style={[
           styles.backgroundContainer,
           { opacity: backgroundOpacity }
         ]}
       >
-        {/* Blurred Background */}
-        <View style={styles.blurredBackground}>
-          <Image 
-            source={require('../assets/images/image.png')}
-            style={styles.backgroundImage}
-            resizeMode="cover"
-          />
-          <View style={styles.blurOverlay} />
-        </View>
+        {/* Background Image */}
+        <Image 
+          source={require('../assets/images/image.png')}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+        />
+        
+        {/* Platform-specific blur overlay */}
+        {Platform.select({
+          ios: (
+            <BlurView
+              intensity={40}
+              tint="light"
+              style={styles.blurOverlayNative}
+            />
+          ),
+          android: (
+            <BlurView
+              intensity={40}
+              tint="light"
+              style={styles.blurOverlayNative}
+            />
+          ),
+          default: ( // For web and other platforms
+            <View style={styles.blurOverlayWeb} />
+          ),
+        })}
+        
+        {/* Additional white overlay for consistent styling */}
+        <View style={styles.whiteOverlay} />
         
         {/* Clear Logo Area */}
         <View style={styles.logoMask}>
@@ -321,7 +343,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    height: height,
   },
   backgroundContainer: {
     position: 'absolute',
@@ -331,26 +352,34 @@ const styles = StyleSheet.create({
     bottom: 0,
     zIndex: -2,
   },
-  blurredBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
   backgroundImage: {
     width: '100%',
     height: '100%',
-    opacity: 0.85,
+    opacity: 0.9,
   },
-  blurOverlay: {
+  blurOverlayNative: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+  },
+  blurOverlayWeb: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     backdropFilter: 'blur(3px)',
+  },
+  whiteOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
   logoMask: {
     position: 'absolute',
