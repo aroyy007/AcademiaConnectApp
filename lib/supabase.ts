@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
 import { Platform } from 'react-native';
+import { uriToFile } from '@/utils/imageUtils';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
@@ -26,7 +27,7 @@ export const auth = {
         data: metadata,
       },
     });
-
+    
     console.log('Sign up result:', result);
     return result;
   },
@@ -36,7 +37,7 @@ export const auth = {
       email,
       password,
     });
-
+    
     console.log('Sign in result:', result);
     return result;
   },
@@ -79,14 +80,14 @@ export const storage = {
   uploadImage: async (uri: string, bucket: string, fileName: string, pickerResult?: any) => {
     try {
       const file = await uriToFile(uri, fileName, 'image/jpeg', pickerResult);
-
+      
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: true
         });
-
+  
       if (error) throw error;
       return data;
     } catch (error) {
@@ -96,13 +97,13 @@ export const storage = {
   },
 
   uploadDocument: async (
-    file: File | { uri: string; name: string; type: string },
-    bucket: 'messages',
+    file: File | { uri: string; name: string; type: string }, 
+    bucket: 'messages', 
     fileName: string
   ) => {
     try {
       console.log('Uploading document to bucket:', bucket, 'with filename:', fileName);
-
+      
       let uploadFile: File;
 
       if (Platform.OS === 'web' && file instanceof File) {
@@ -114,9 +115,9 @@ export const storage = {
       } else {
         throw new Error('Invalid file format');
       }
-
+      
       console.log('Using filename:', fileName);
-
+      
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage
         .from(bucket)
@@ -138,7 +139,7 @@ export const storage = {
         .getPublicUrl(fileName);
 
       console.log('Public URL generated:', urlData.publicUrl);
-
+      
       return {
         data: {
           path: fileName,
@@ -173,20 +174,20 @@ export const storage = {
   // Helper to convert base64 to File object for web (legacy support)
   base64ToFile: (base64String: string, fileName: string): File => {
     // Remove data URL prefix if present
-    const base64Data = base64String.includes(',')
-      ? base64String.split(',')[1]
+    const base64Data = base64String.includes(',') 
+      ? base64String.split(',')[1] 
       : base64String;
-
+    
     // Convert base64 to binary
     const byteCharacters = atob(base64Data);
     const byteNumbers = new Array(byteCharacters.length);
-
+    
     for (let i = 0; i < byteCharacters.length; i++) {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
-
+    
     const byteArray = new Uint8Array(byteNumbers);
-
+    
     // Determine MIME type from base64 prefix
     let mimeType = 'image/jpeg'; // default
     if (base64String.includes('data:image/')) {
@@ -195,12 +196,10 @@ export const storage = {
         mimeType = `image/${mimeMatch[1]}`;
       }
     }
-
+    
     return new File([byteArray], fileName, { type: mimeType });
   }
 };
-
-
 
 // Database helpers (keeping existing implementation)
 export const db = {
@@ -219,14 +218,14 @@ export const db = {
         `)
         .eq('id', userId)
         .single();
-
+      
       console.log('Profile result:', result);
       return result;
     },
 
     update: async (userId: string, updates: any) => {
       console.log('Updating profile for user:', userId, 'with data:', updates);
-
+      
       // Handle image upload if avatar_url is a File object or image picker result
       if (updates.avatar_url && (updates.avatar_url instanceof File || 'uri' in updates.avatar_url)) {
         console.log('Uploading new avatar image...');
@@ -238,21 +237,21 @@ export const db = {
           fileName,
           updates.avatar_url
         );
-
+        
         if (uploadError) {
           console.error('Avatar upload failed:', uploadError);
           throw uploadError;
         }
-
+        
         // Get public URL for the uploaded file
         const { data: urlData } = supabase.storage
           .from('avatars')
           .getPublicUrl(fileName);
-
+        
         updates.avatar_url = urlData.publicUrl;
         console.log('Avatar uploaded successfully, URL:', updates.avatar_url);
       }
-
+      
       // If department code is provided, find the department ID
       if (updates.departmentCode) {
         const { data: dept } = await supabase
@@ -260,16 +259,16 @@ export const db = {
           .select('id')
           .eq('code', updates.departmentCode)
           .single();
-
+        
         if (dept) {
           updates.department_id = dept.id;
         }
-
+        
         // Remove the temporary field
         delete updates.departmentCode;
         delete updates.departmentName;
       }
-
+      
       const result = await supabase
         .from('profiles')
         .update({
@@ -278,7 +277,7 @@ export const db = {
         })
         .eq('id', userId)
         .select();
-
+      
       console.log('Profile update result:', result);
       return result;
     },
@@ -303,7 +302,7 @@ export const db = {
     getAll: async (limit = 20, offset = 0) => {
       // Get the current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-
+      
       if (userError || !user) {
         console.error('User not authenticated:', userError);
         return { data: [], error: userError };
@@ -321,7 +320,7 @@ export const db = {
       }
 
       const friendIds = friendships?.map(f => f.friend_id) || [];
-
+      
       // Include the current user's own posts
       const allowedAuthorIds = [user.id, ...friendIds];
 
@@ -369,10 +368,10 @@ export const db = {
 
     create: async (post: any) => {
       console.log('Creating post with data:', post);
-
+      
       // Get the current user to set author_id
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-
+      
       if (userError || !user) {
         console.error('User not authenticated:', userError);
         throw new Error('You must be logged in to create a post');
@@ -390,17 +389,17 @@ export const db = {
           fileName,
           post.image_url
         );
-
+        
         if (uploadError) {
           console.error('Post image upload failed:', uploadError);
           throw uploadError;
         }
-
+        
         // Get public URL for the uploaded file
         const { data: urlData } = supabase.storage
           .from('posts')
           .getPublicUrl(fileName);
-
+        
         imageUrl = urlData.publicUrl;
         console.log('Post image uploaded successfully, URL:', imageUrl);
       }
@@ -456,7 +455,7 @@ export const db = {
     addComment: async (comment: any) => {
       // Get the current user to set author_id
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-
+      
       if (userError || !user) {
         console.error('User not authenticated:', userError);
         throw new Error('You must be logged in to comment');
@@ -513,4 +512,5 @@ export const db = {
     },
   },
 
-}
+
+};
