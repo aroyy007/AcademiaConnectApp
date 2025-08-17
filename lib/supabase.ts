@@ -27,7 +27,7 @@ export const auth = {
         data: metadata,
       },
     });
-    
+
     console.log('Sign up result:', result);
     return result;
   },
@@ -37,7 +37,7 @@ export const auth = {
       email,
       password,
     });
-    
+
     console.log('Sign in result:', result);
     return result;
   },
@@ -80,14 +80,14 @@ export const storage = {
   uploadImage: async (uri: string, bucket: string, fileName: string, pickerResult?: any) => {
     try {
       const file = await uriToFile(uri, fileName, 'image/jpeg', pickerResult);
-      
+
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: true
         });
-  
+
       if (error) throw error;
       return data;
     } catch (error) {
@@ -97,13 +97,13 @@ export const storage = {
   },
 
   uploadDocument: async (
-    file: File | { uri: string; name: string; type: string }, 
-    bucket: 'messages', 
+    file: File | { uri: string; name: string; type: string },
+    bucket: 'messages',
     fileName: string
   ) => {
     try {
       console.log('Uploading document to bucket:', bucket, 'with filename:', fileName);
-      
+
       let uploadFile: File;
 
       if (Platform.OS === 'web' && file instanceof File) {
@@ -115,9 +115,9 @@ export const storage = {
       } else {
         throw new Error('Invalid file format');
       }
-      
+
       console.log('Using filename:', fileName);
-      
+
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage
         .from(bucket)
@@ -139,7 +139,7 @@ export const storage = {
         .getPublicUrl(fileName);
 
       console.log('Public URL generated:', urlData.publicUrl);
-      
+
       return {
         data: {
           path: fileName,
@@ -174,20 +174,20 @@ export const storage = {
   // Helper to convert base64 to File object for web (legacy support)
   base64ToFile: (base64String: string, fileName: string): File => {
     // Remove data URL prefix if present
-    const base64Data = base64String.includes(',') 
-      ? base64String.split(',')[1] 
+    const base64Data = base64String.includes(',')
+      ? base64String.split(',')[1]
       : base64String;
-    
+
     // Convert base64 to binary
     const byteCharacters = atob(base64Data);
     const byteNumbers = new Array(byteCharacters.length);
-    
+
     for (let i = 0; i < byteCharacters.length; i++) {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
-    
+
     const byteArray = new Uint8Array(byteNumbers);
-    
+
     // Determine MIME type from base64 prefix
     let mimeType = 'image/jpeg'; // default
     if (base64String.includes('data:image/')) {
@@ -196,7 +196,7 @@ export const storage = {
         mimeType = `image/${mimeMatch[1]}`;
       }
     }
-    
+
     return new File([byteArray], fileName, { type: mimeType });
   }
 };
@@ -218,14 +218,14 @@ export const db = {
         `)
         .eq('id', userId)
         .single();
-      
+
       console.log('Profile result:', result);
       return result;
     },
 
     update: async (userId: string, updates: any) => {
       console.log('Updating profile for user:', userId, 'with data:', updates);
-      
+
       // Handle image upload if avatar_url is a File object or image picker result
       if (updates.avatar_url && (updates.avatar_url instanceof File || 'uri' in updates.avatar_url)) {
         console.log('Uploading new avatar image...');
@@ -237,21 +237,21 @@ export const db = {
           fileName,
           updates.avatar_url
         );
-        
+
         if (uploadError) {
           console.error('Avatar upload failed:', uploadError);
           throw uploadError;
         }
-        
+
         // Get public URL for the uploaded file
         const { data: urlData } = supabase.storage
           .from('avatars')
           .getPublicUrl(fileName);
-        
+
         updates.avatar_url = urlData.publicUrl;
         console.log('Avatar uploaded successfully, URL:', updates.avatar_url);
       }
-      
+
       // If department code is provided, find the department ID
       if (updates.departmentCode) {
         const { data: dept } = await supabase
@@ -259,16 +259,16 @@ export const db = {
           .select('id')
           .eq('code', updates.departmentCode)
           .single();
-        
+
         if (dept) {
           updates.department_id = dept.id;
         }
-        
+
         // Remove the temporary field
         delete updates.departmentCode;
         delete updates.departmentName;
       }
-      
+
       const result = await supabase
         .from('profiles')
         .update({
@@ -277,7 +277,7 @@ export const db = {
         })
         .eq('id', userId)
         .select();
-      
+
       console.log('Profile update result:', result);
       return result;
     },
@@ -302,7 +302,7 @@ export const db = {
     getAll: async (limit = 20, offset = 0) => {
       // Get the current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
+
       if (userError || !user) {
         console.error('User not authenticated:', userError);
         return { data: [], error: userError };
@@ -320,7 +320,7 @@ export const db = {
       }
 
       const friendIds = friendships?.map(f => f.friend_id) || [];
-      
+
       // Include the current user's own posts
       const allowedAuthorIds = [user.id, ...friendIds];
 
@@ -368,10 +368,10 @@ export const db = {
 
     create: async (post: any) => {
       console.log('Creating post with data:', post);
-      
+
       // Get the current user to set author_id
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
+
       if (userError || !user) {
         console.error('User not authenticated:', userError);
         throw new Error('You must be logged in to create a post');
@@ -389,17 +389,17 @@ export const db = {
           fileName,
           post.image_url
         );
-        
+
         if (uploadError) {
           console.error('Post image upload failed:', uploadError);
           throw uploadError;
         }
-        
+
         // Get public URL for the uploaded file
         const { data: urlData } = supabase.storage
           .from('posts')
           .getPublicUrl(fileName);
-        
+
         imageUrl = urlData.publicUrl;
         console.log('Post image uploaded successfully, URL:', imageUrl);
       }
@@ -455,7 +455,7 @@ export const db = {
     addComment: async (comment: any) => {
       // Get the current user to set author_id
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
+
       if (userError || !user) {
         console.error('User not authenticated:', userError);
         throw new Error('You must be logged in to comment');
@@ -512,5 +512,543 @@ export const db = {
     },
   },
 
+  // Friend operations
+  friends: {
+    getFriends: async (userId: string) => {
+      return await supabase
+        .from('friendships')
+        .select(`
+          friend_id,
+          profiles!friendships_friend_id_fkey (
+            id,
+            full_name,
+            avatar_url,
+            department_id,
+            semester,
+            section,
+            departments (
+              code,
+              name
+            )
+          )
+        `)
+        .eq('user_id', userId);
+    },
+
+    // Check if a friend request already exists between two users (in either direction)
+    checkExistingRequest: async (senderId: string, receiverId: string) => {
+      return await supabase
+        .from('friend_requests')
+        .select('id, status, sender_id, receiver_id')
+        .or(`and(sender_id.eq.${senderId},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId})`)
+        .in('status', ['pending', 'accepted']);
+    },
+
+    sendRequest: async (senderId: string, receiverId: string) => {
+      // First check if a request already exists
+      const { data: existingRequests, error: checkError } = await db.friends.checkExistingRequest(senderId, receiverId);
+
+      if (checkError) {
+        console.error('Error checking existing requests:', checkError);
+        return { error: checkError };
+      }
+
+      if (existingRequests && existingRequests.length > 0) {
+        const existingRequest = existingRequests[0];
+
+        // If there's already a pending or accepted request, don't create a new one
+        if (existingRequest.status === 'pending') {
+          return {
+            error: new Error('A friend request is already pending between these users')
+          };
+        } else if (existingRequest.status === 'accepted') {
+          return {
+            error: new Error('These users are already friends')
+          };
+        }
+      }
+
+      // If no existing request, create a new one
+      return await supabase
+        .from('friend_requests')
+        .insert({
+          sender_id: senderId,
+          receiver_id: receiverId,
+        });
+    },
+
+    acceptRequest: async (requestId: string) => {
+      try {
+        // Use the database function to safely accept friend request
+        const { data, error } = await supabase
+          .rpc('accept_friend_request', { request_uuid: requestId });
+
+        if (error) {
+          console.error('Error calling accept_friend_request function:', error);
+          // Fallback to manual process if function doesn't exist
+          return await db.friends.acceptRequestManual(requestId);
+        }
+
+        if (data && !data.success) {
+          return { error: new Error(data.error) };
+        }
+
+        return { error: null };
+      } catch (error) {
+        console.error('Error in acceptRequest:', error);
+        // Fallback to manual process
+        return await db.friends.acceptRequestManual(requestId);
+      }
+    },
+
+    // Fallback manual accept function
+    acceptRequestManual: async (requestId: string) => {
+      // First get the request details
+      const { data: request, error: requestError } = await supabase
+        .from('friend_requests')
+        .select('sender_id, receiver_id, status')
+        .eq('id', requestId)
+        .single();
+
+      if (requestError || !request) {
+        return { error: requestError || new Error('Request not found') };
+      }
+
+      // Check if request is already accepted
+      if (request.status === 'accepted') {
+        return { error: new Error('Friend request already accepted') };
+      }
+
+      // Update the request status to accepted first
+      const { error: updateError } = await supabase
+        .from('friend_requests')
+        .update({ status: 'accepted', updated_at: new Date().toISOString() })
+        .eq('id', requestId);
+
+      if (updateError) {
+        return { error: updateError };
+      }
+
+      // Check if friendship already exists before creating
+      const { data: existingFriendships, error: checkError } = await supabase
+        .from('friendships')
+        .select('id')
+        .or(`and(user_id.eq.${request.sender_id},friend_id.eq.${request.receiver_id}),and(user_id.eq.${request.receiver_id},friend_id.eq.${request.sender_id})`);
+
+      if (checkError) {
+        console.error('Error checking existing friendships:', checkError);
+        return { error: checkError };
+      }
+
+      // If friendships already exist, we're done
+      if (existingFriendships && existingFriendships.length > 0) {
+        console.log('Friendships already exist, request accepted successfully');
+        return { error: null };
+      }
+
+      // Create friendship entries (bidirectional) using upsert to handle duplicates
+      const { error: friendshipError } = await supabase
+        .from('friendships')
+        .upsert([
+          { user_id: request.sender_id, friend_id: request.receiver_id },
+          { user_id: request.receiver_id, friend_id: request.sender_id }
+        ], {
+          onConflict: 'user_id,friend_id',
+          ignoreDuplicates: true
+        });
+
+      if (friendshipError) {
+        console.error('Error creating friendships:', friendshipError);
+        // If it's a duplicate key error, it means friendships already exist
+        if (friendshipError.code === '23505') {
+          console.log('Friendships already exist (duplicate key), continuing...');
+          return { error: null };
+        }
+        return { error: friendshipError };
+      }
+
+      return { error: null };
+    },
+
+    rejectRequest: async (requestId: string) => {
+      return await supabase
+        .from('friend_requests')
+        .update({ status: 'rejected' })
+        .eq('id', requestId);
+    },
+
+    getPendingRequests: async (userId: string) => {
+      return await supabase
+        .from('friend_requests')
+        .select(`
+          *,
+          profiles!friend_requests_sender_id_fkey (
+            id,
+            full_name,
+            avatar_url,
+            department_id,
+            semester,
+            section,
+            departments (
+              code,
+              name
+            )
+          )
+        `)
+        .eq('receiver_id', userId)
+        .eq('status', 'pending');
+    },
+
+    // Get all friend requests sent by a user
+    getSentRequests: async (userId: string) => {
+      return await supabase
+        .from('friend_requests')
+        .select(`
+          *,
+          profiles!friend_requests_receiver_id_fkey (
+            id,
+            full_name,
+            avatar_url,
+            department_id,
+            semester,
+            section,
+            departments (
+              code,
+              name
+            )
+          )
+        `)
+        .eq('sender_id', userId)
+        .eq('status', 'pending');
+    },
+  },
+
+  // Notification operations
+  notifications: {
+    getAll: async (userId: string) => {
+      return await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+    },
+
+    markAsRead: async (notificationId: string) => {
+      return await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId);
+    },
+
+    markAllAsRead: async (userId: string) => {
+      return await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', userId)
+        .eq('is_read', false);
+    },
+
+    create: async (notification: any) => {
+      return await supabase
+        .from('notifications')
+        .insert(notification);
+    },
+  },
+
+  // Real-time subscriptions with proper channel management
+  export const realtime = {
+    subscribeToNotifications: (userId: string, callback: (payload: any) => void) => {
+      const channelName = `notifications-${userId}`;
+
+      // Check if channel already exists and is subscribed
+      if (activeChannels.has(channelName)) {
+        const existingChannel = activeChannels.get(channelName);
+        console.log(`Channel ${channelName} already exists with state: ${existingChannel.state}`);
+
+        // If channel is already joined, return existing subscription
+        if (existingChannel.state === 'joined') {
+          console.log(`Channel ${channelName} already subscribed, returning existing subscription`);
+          return {
+            unsubscribe: () => {
+              console.log(`Unsubscribing from existing ${channelName}`);
+              existingChannel.unsubscribe();
+              activeChannels.delete(channelName);
+            }
+          };
+        } else {
+          // Channel exists but not joined, unsubscribe and remove it first
+          console.log(`Channel ${channelName} exists but not joined, cleaning up...`);
+          existingChannel.unsubscribe();
+          activeChannels.delete(channelName);
+        }
+      }
+
+      console.log(`Creating new subscription for ${channelName}`);
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${userId}`,
+          },
+          callback
+        );
+
+      // Store the channel before subscribing
+      activeChannels.set(channelName, channel);
+
+      channel.subscribe((status) => {
+        console.log(`Notifications subscription status: ${status}`);
+        if (status === 'CLOSED') {
+          activeChannels.delete(channelName);
+        }
+      });
+
+      return {
+        unsubscribe: () => {
+          console.log(`Unsubscribing from ${channelName}`);
+          channel.unsubscribe();
+          activeChannels.delete(channelName);
+        }
+      };
+    },
+
+    subscribeToPosts: (callback: (payload: any) => void) => {
+      const channelName = 'posts';
+
+      // Check if channel already exists and is subscribed
+      if (activeChannels.has(channelName)) {
+        const existingChannel = activeChannels.get(channelName);
+        console.log(`Channel ${channelName} already exists with state: ${existingChannel.state}`);
+
+        // If channel is already joined, return existing subscription
+        if (existingChannel.state === 'joined') {
+          console.log(`Channel ${channelName} already subscribed, returning existing subscription`);
+          return {
+            unsubscribe: () => {
+              console.log(`Unsubscribing from existing ${channelName}`);
+              existingChannel.unsubscribe();
+              activeChannels.delete(channelName);
+            }
+          };
+        } else {
+          // Channel exists but not joined, unsubscribe and remove it first
+          console.log(`Channel ${channelName} exists but not joined, cleaning up...`);
+          existingChannel.unsubscribe();
+          activeChannels.delete(channelName);
+        }
+      }
+
+      console.log(`Creating new subscription for ${channelName}`);
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'posts',
+          },
+          callback
+        );
+
+      // Store the channel before subscribing
+      activeChannels.set(channelName, channel);
+
+      channel.subscribe((status) => {
+        console.log(`Posts subscription status: ${status}`);
+        if (status === 'CLOSED') {
+          activeChannels.delete(channelName);
+        }
+      });
+
+      return {
+        unsubscribe: () => {
+          console.log(`Unsubscribing from ${channelName}`);
+          channel.unsubscribe();
+          activeChannels.delete(channelName);
+        }
+      };
+    },
+
+    subscribeToPostComments: (callback: (payload: any) => void) => {
+      const channelName = 'post-comments';
+
+      // Check if channel already exists and is subscribed
+      if (activeChannels.has(channelName)) {
+        const existingChannel = activeChannels.get(channelName);
+        console.log(`Channel ${channelName} already exists with state: ${existingChannel.state}`);
+
+        // If channel is already joined, return existing subscription
+        if (existingChannel.state === 'joined') {
+          console.log(`Channel ${channelName} already subscribed, returning existing subscription`);
+          return {
+            unsubscribe: () => {
+              console.log(`Unsubscribing from existing ${channelName}`);
+              existingChannel.unsubscribe();
+              activeChannels.delete(channelName);
+            }
+          };
+        } else {
+          // Channel exists but not joined, unsubscribe and remove it first
+          console.log(`Channel ${channelName} exists but not joined, cleaning up...`);
+          existingChannel.unsubscribe();
+          activeChannels.delete(channelName);
+        }
+      }
+
+      console.log(`Creating new subscription for ${channelName}`);
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'post_comments',
+          },
+          callback
+        );
+
+      // Store the channel before subscribing
+      activeChannels.set(channelName, channel);
+
+      channel.subscribe((status) => {
+        console.log(`Post comments subscription status: ${status}`);
+        if (status === 'CLOSED') {
+          activeChannels.delete(channelName);
+        }
+      });
+
+      return {
+        unsubscribe: () => {
+          console.log(`Unsubscribing from ${channelName}`);
+          channel.unsubscribe();
+          activeChannels.delete(channelName);
+        }
+      };
+    },
+
+    subscribeToFriendRequests: (userId: string, callback: (payload: any) => void) => {
+      const channelName = `friend-requests-${userId}`;
+
+      // Check if channel already exists and is subscribed
+      if (activeChannels.has(channelName)) {
+        const existingChannel = activeChannels.get(channelName);
+        console.log(`Channel ${channelName} already exists with state: ${existingChannel.state}`);
+
+        // If channel is already joined, return existing subscription
+        if (existingChannel.state === 'joined') {
+          console.log(`Channel ${channelName} already subscribed, returning existing subscription`);
+          return {
+            unsubscribe: () => {
+              console.log(`Unsubscribing from existing ${channelName}`);
+              existingChannel.unsubscribe();
+              activeChannels.delete(channelName);
+            }
+          };
+        } else {
+          // Channel exists but not joined, unsubscribe and remove it first
+          console.log(`Channel ${channelName} exists but not joined, cleaning up...`);
+          existingChannel.unsubscribe();
+          activeChannels.delete(channelName);
+        }
+      }
+
+      console.log(`Creating new subscription for ${channelName}`);
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'friend_requests',
+            filter: `receiver_id=eq.${userId}`,
+          },
+          callback
+        );
+
+      // Store the channel before subscribing
+      activeChannels.set(channelName, channel);
+
+      channel.subscribe((status) => {
+        console.log(`Friend requests subscription status: ${status}`);
+        if (status === 'CLOSED') {
+          activeChannels.delete(channelName);
+        }
+      });
+
+      return {
+        unsubscribe: () => {
+          console.log(`Unsubscribing from ${channelName}`);
+          channel.unsubscribe();
+          activeChannels.delete(channelName);
+        }
+      };
+    },
+
+    subscribeToFriendships: (userId: string, callback: (payload: any) => void) => {
+      const channelName = `friendships-${userId}`;
+
+      // Check if channel already exists and is subscribed
+      if (activeChannels.has(channelName)) {
+        const existingChannel = activeChannels.get(channelName);
+        console.log(`Channel ${channelName} already exists with state: ${existingChannel.state}`);
+
+        // If channel is already joined, return existing subscription
+        if (existingChannel.state === 'joined') {
+          console.log(`Channel ${channelName} already subscribed, returning existing subscription`);
+          return {
+            unsubscribe: () => {
+              console.log(`Unsubscribing from existing ${channelName}`);
+              existingChannel.unsubscribe();
+              activeChannels.delete(channelName);
+            }
+          };
+        } else {
+          // Channel exists but not joined, unsubscribe and remove it first
+          console.log(`Channel ${channelName} exists but not joined, cleaning up...`);
+          existingChannel.unsubscribe();
+          activeChannels.delete(channelName);
+        }
+      }
+
+      console.log(`Creating new subscription for ${channelName}`);
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'friendships',
+            filter: `user_id=eq.${userId}`,
+          },
+          callback
+        );
+
+      // Store the channel before subscribing
+      activeChannels.set(channelName, channel);
+
+      channel.subscribe((status) => {
+        console.log(`Friendships subscription status: ${status}`);
+        if (status === 'CLOSED') {
+          activeChannels.delete(channelName);
+        }
+      });
+
+      return {
+        unsubscribe: () => {
+          console.log(`Unsubscribing from ${channelName}`);
+          channel.unsubscribe();
+          activeChannels.delete(channelName);
+        }
+      };
+    },
+  }
 
 };
