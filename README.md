@@ -9,17 +9,53 @@ AcademiaConnect is a React Native mobile application built with Expo that serves
 ## ✨ Features
 
 ### Currently Implemented
+
 - ✅ **User Authentication**
+
   - Email/password registration and login
-  - Secure session management with Supabase
+  - Google OAuth integration
   - EDU email validation (@eastdelta.edu.bd)
-  - Profile management with avatar upload
+  - Secure session management with Supabase
+  - Protected routes with AuthGuard
 
 - ✅ **Social Features**
+
   - Create and share posts with text and images
-  - View posts from the community
+  - Like and comment on posts in real-time
   - Modern feed interface with pull-to-refresh
-  - Image upload and processing
+  - Faculty announcement posts with special badges
+  - Post visibility controls (Friends, Department, Public)
+  - Rich content creation with emoji picker
+  - Image upload with camera/gallery options
+
+- ✅ **Friend System**
+
+  - Send and receive friend requests
+  - Accept/reject friend requests with real-time updates
+  - Friend status tracking and management
+  - Real-time friend request notifications
+
+- ✅ **Search & Discovery**
+
+  - Search users by name or EDU email
+  - Filter results by department, semester, and section
+  - Real-time search with instant results
+  - Friend status indicators in search results
+
+- ✅ **Notifications System**
+
+  - Real-time notifications for friend requests
+  - Post interaction notifications (likes, comments)
+  - Unread notification badges and counters
+  - Interactive notification actions (accept/reject)
+  - Notification history and management
+
+- ✅ **Messaging Foundation**
+
+  - Floating message button with unread count
+  - Direct conversation infrastructure
+  - Real-time messaging backend
+  - Typing indicators and message status
 
 - ✅ **Profile System**
   - Customizable user profiles
@@ -27,16 +63,33 @@ AcademiaConnect is a React Native mobile application built with Expo that serves
   - Profile picture upload and management
   - Faculty/Student role distinction
 
-### Planned Features
-- 🤝 **Social Connections**
-  - Friend requests and connections
-  - User search functionality
-  - Direct messaging
+### In Progress
 
-- 📚 **Academic Features**
-  - Class schedules
-  - Course information
-  - Academic announcements
+- 🚧 **Profile Management**
+
+  - Complete profile editing interface
+  - Bio and personal information updates
+  - Advanced profile customization
+
+- 🚧 **Class Schedules**
+  - Personal schedule viewing
+  - Course information display
+  - Schedule sharing capabilities
+
+### Planned Features
+
+- 💬 **Complete Messaging**
+
+  - Full messaging interface
+  - Group conversations
+  - File and media sharing
+  - Message reactions and replies
+
+- 📚 **Enhanced Academic Features**
+  - Course enrollment tracking
+  - Assignment and exam reminders
+  - Academic calendar integration
+  - Study group formation
 
 ## 🛠 Tech Stack
 
@@ -56,6 +109,7 @@ AcademiaConnect is a React Native mobile application built with Expo that serves
 ## 🗄 Database Structure
 
 Core tables implemented:
+
 - **profiles**: User information and academic details
 - **posts**: Social media content
 - **departments**: Academic department records
@@ -64,6 +118,7 @@ Core tables implemented:
 ## 🎨 Design System
 
 Implements a consistent design system with:
+
 - Color palette (defined in `constants/colors.ts`)
 - Typography using standard fonts
 - Consistent spacing and layout
@@ -72,6 +127,7 @@ Implements a consistent design system with:
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js v16+
 - npm or yarn
 - Expo CLI
@@ -79,6 +135,7 @@ Implements a consistent design system with:
 - iOS Simulator or Android Emulator
 
 ### Installation
+
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Configure environment:
@@ -91,6 +148,7 @@ Implements a consistent design system with:
 ## 📝 Contributing
 
 Contributions are welcome! Please follow these steps:
+
 1. Fork the repository
 2. Create a feature branch
 3. Commit your changes
