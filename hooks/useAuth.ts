@@ -154,68 +154,76 @@ export function useAuth() {
   const signOut = async () => {
     try {
       setLoading(true);
+      console.log('useAuth: Starting sign out process...');
       
-      // Clear local state immediately
+      // Sign out from Supabase first
+      const { error } = await auth.signOut();
+      if (error) {
+        console.error('Supabase sign out error:', error);
+        // Continue with local cleanup even if Supabase signout fails
+      }
+      
+      // Clear local state
       setUser(null);
       setProfile(null);
       
       // Clear browser storage
       await AsyncStorage.clear();
-      console.log('useAuth: User signed out, clearing local state and storage');
+      console.log('useAuth: Local state and storage cleared');
       
-      // Sign out from Supabase
-      const { error } = await auth.signOut();
-      if (error) {
-        console.error('Sign out error:', error);
-        throw error;
-      }
-      
-      // Navigate to landing page
-      router.replace('/');
+      // Navigate to login page with a small delay to ensure state is cleared
+      setTimeout(() => {
+        router.replace('/login');
+        console.log('useAuth: Navigated to login page');
+      }, 100);
       
       return { error: null };
     } catch (error) {
       console.error('Sign out error:', error);
+      
+      // Even on error, clear local data for security
+      setUser(null);
+      setProfile(null);
+      await AsyncStorage.clear();
+      
+      // Force navigation to login
+      setTimeout(() => {
+        router.replace('/login');
+      }, 100);
+      
       return { error };
     } finally {
       setLoading(false);
     }
   };
 
-  const updateProfile = async (updates: Partial<UserProfile>) => {
-    if (!user) return { error: new Error('No user logged in') };
-
+  const updateProfile = async (profileData: any) => {
     try {
-      setLoading(true);
-      console.log('useAuth: Updating profile for user:', user.id, 'with updates:', updates);
-      
-      // Ensure we're sending the correct column names to the database
-      const dbUpdates = {
-        ...updates,
-        // Map any potential name conflicts
-        full_name: updates.full_name,
-        student_id: updates.student_id,
-      };
-      
-      console.log('useAuth: Sending to database:', dbUpdates);
-      
-      const { error } = await db.profiles.update(user.id, dbUpdates);
-      if (error) {
-        console.error('useAuth: Database update error:', error);
-        throw error;
+      if (!user) {
+        throw new Error('User not authenticated');
       }
 
-      console.log('useAuth: Profile update successful, reloading profile...');
-      // Reload profile to get updated data
+      console.log('useAuth: Updating profile for user:', user.id, 'with data:', profileData);
+      
+      const { data, error } = await db.profiles.update(user.id, profileData);
+      
+      if (error) {
+        console.error('useAuth: Update profile error:', error);
+        throw error;
+      }
+      
+      console.log('useAuth: Profile updated successfully');
+      
+      // Reload the profile to get the updated data
       await loadProfile(user.id);
-      return { error: null };
+      
+      return { data, error: null };
     } catch (error) {
       console.error('useAuth: Update profile error:', error);
-      return { error };
-    } finally {
-      setLoading(false);
+      return { data: null, error };
     }
   };
+
 
   const isAuthenticated = () => {
     const result = !!(user && profile);
