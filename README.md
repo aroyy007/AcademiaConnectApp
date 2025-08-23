@@ -2,127 +2,129 @@
 
 A social networking platform designed specifically for East Delta University students to connect, share, and collaborate within their academic community.
 
-## 🎯 Project Overview
+## 🎯 Project Status
 
-AcademiaConnect is a React Native mobile application built with Expo that serves as a dedicated social platform for East Delta University students. The app enables students to create accounts using their EDU email addresses, connect with peers, share posts with images, and interact through a modern social interface.
+### ✅ Completed Features
 
-## ✨ Features
+1. **Authentication System**
 
-### Currently Implemented
+   - Email/password registration with EDU email validation
+   - Secure session management with Supabase
+   - Profile creation with academic details
+   - Avatar upload and management
+   - Session persistence
 
-- ✅ **User Authentication**
+2. **Social Features**
 
-  - Email/password registration and login
-  - Google OAuth integration
-  - EDU email validation (@eastdelta.edu.bd)
-  - Secure session management with Supabase
-  - Protected routes with AuthGuard
+   - Feed with posts and announcements
+   - Image sharing with post creation
+   - Like and comment system
+   - Real-time updates using Supabase subscriptions
+   - Post visibility controls
 
-- ✅ **Social Features**
+3. **Friend System**
 
-  - Create and share posts with text and images
-  - Like and comment on posts in real-time
-  - Modern feed interface with pull-to-refresh
-  - Faculty announcement posts with special badges
-  - Post visibility controls (Friends, Department, Public)
-  - Rich content creation with emoji picker
-  - Image upload with camera/gallery options
+   - Send/receive friend requests
+   - Accept/reject requests
+   - Friend list management
+   - Real-time friend request notifications
 
-- ✅ **Friend System**
+4. **Profile System**
 
-  - Send and receive friend requests
-  - Accept/reject friend requests with real-time updates
-  - Friend status tracking and management
-  - Real-time friend request notifications
+   - Detailed academic profiles
+   - Department and semester information
+   - Faculty/Student role distinction
+   - Profile editing capabilities
+   - Avatar management
 
-- ✅ **Search & Discovery**
+5. **User Search**
 
-  - Search users by name or EDU email
-  - Filter results by department, semester, and section
-  - Real-time search with instant results
-  - Friend status indicators in search results
+   - Search by name or email
+   - Department and semester filters
+   - Real-time search results
+   - Friend status indicators
 
-- ✅ **Notifications System**
+6. **Messaging Foundation**
+   - Database schema implemented
+   - Basic conversation structure
+   - Real-time message delivery
+   - Read receipts system
+   - Typing indicators
 
-  - Real-time notifications for friend requests
-  - Post interaction notifications (likes, comments)
-  - Unread notification badges and counters
-  - Interactive notification actions (accept/reject)
-  - Notification history and management
+### 🚧 In Progress
 
-- ✅ **Messaging Foundation**
+1. **Schedule System**
 
-  - Floating message button with unread count
-  - Direct conversation infrastructure
-  - Real-time messaging backend
-  - Typing indicators and message status
+   - Database schema complete
+   - Basic UI implemented
+   - Working on:
+     - Course enrollment
+     - Schedule display
+     - Time slot management
+     - Faculty schedule management
 
-- ✅ **Profile System**
-  - Customizable user profiles
-  - Academic information (department, semester, section)
-  - Profile picture upload and management
-  - Faculty/Student role distinction
+2. **Messaging Interface**
+   - Working on:
+     - Conversation UI
+     - Message thread view
+     - Media sharing
+     - Group chat functionality
 
-### In Progress
+### 🎯 Planned Features
 
-- 🚧 **Profile Management**
+1. **Enhanced Academic Features**
 
-  - Complete profile editing interface
-  - Bio and personal information updates
-  - Advanced profile customization
+   - Course materials sharing
+   - Assignment tracking
+   - Study group formation
+   - Academic calendar
 
-- 🚧 **Class Schedules**
-  - Personal schedule viewing
-  - Course information display
-  - Schedule sharing capabilities
+2. **Advanced Social Features**
+   - Event organization
+   - Department-specific feeds
+   - Club and society management
+   - Academic announcements system
 
-### Planned Features
+## 🛠 Technical Stack
 
-- 💬 **Complete Messaging**
-
-  - Full messaging interface
-  - Group conversations
-  - File and media sharing
-  - Message reactions and replies
-
-- 📚 **Enhanced Academic Features**
-  - Course enrollment tracking
-  - Assignment and exam reminders
-  - Academic calendar integration
-  - Study group formation
-
-## 🛠 Tech Stack
-
-- **Frontend**: React Native with Expo
+- **Frontend**: React Native (Expo)
 - **Backend**: Supabase
-  - Real-time PostgreSQL database
-  - File storage for images
-  - Authentication services
-- **UI/UX**:
-  - Custom React Native components
-  - Lucide icons
-  - Native platform styling
-- **State Management**: React Hooks and Context
-- **Form Handling**: Formik with Yup validation
-- **TypeScript**: Full type safety
+  - PostgreSQL Database
+  - Real-time subscriptions
+  - Storage for media
+  - Authentication
+- **State Management**: React Hooks + Context
+- **Form Handling**: Formik + Yup
+- **UI Components**: Custom React Native components
+- **Icons**: Lucide React Native
+- **Type Safety**: TypeScript
 
-## 🗄 Database Structure
+## 🗄️ Database Structure
 
-Core tables implemented:
+### Core Tables
 
-- **profiles**: User information and academic details
-- **posts**: Social media content
-- **departments**: Academic department records
-- **post_comments**: Post interaction system
+- `profiles`: User profiles and academic info
+- `posts`: Social media content
+- `post_likes`: Post interaction tracking
+- `post_comments`: Comment system
+- `friendships`: Bidirectional friend relationships
+- `friend_requests`: Friend request management
+- `notifications`: System notifications
+- `departments`: Academic departments
+- `courses`: Course catalog
+- `schedules`: Class schedules
+- `conversations`: Messaging system
+- `messages`: Chat messages
 
 ## 🎨 Design System
 
 Implements a consistent design system with:
 
-- Color palette (defined in `constants/colors.ts`)
-- Typography using standard fonts
-- Consistent spacing and layout
-- Platform-specific UI adaptations
+- **Colors**: Defined in `constants/colors.ts`
+- **Typography**: Custom font system with Inter font family
+- **Spacing**: Standardized spacing scale
+- **Components**: Reusable UI components
+- **Platform Adaptations**: iOS and Android specific adjustments
 
 ## 🚀 Getting Started
 
@@ -132,9 +134,9 @@ Implements a consistent design system with:
 - npm or yarn
 - Expo CLI
 - Supabase account
-- iOS Simulator or Android Emulator
+- iOS Simulator/Android Emulator
 
-### Installation
+### Setup
 
 1. Clone the repository
 2. Install dependencies: `npm install`
@@ -143,13 +145,12 @@ Implements a consistent design system with:
    EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
    EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
-4. Start development: `npm run dev`
+4. Start development: `npm start`
 
-## 📝 Contributing
-
-Contributions are welcome! Please follow these steps:
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
