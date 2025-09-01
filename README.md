@@ -1,4 +1,3 @@
-# Academia Connect
 
 <div align="center">
   <img src="./assets/images/logo.png" alt="Academia Connect Logo" width="400"/>
