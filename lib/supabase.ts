@@ -223,6 +223,71 @@ export const db = {
       return result;
     },
 
+    create: async (userId: string, profileData: any) => {
+      console.log('Creating profile for user:', userId, 'with data:', profileData);
+      
+      // If department code is provided, find the department ID
+      if (profileData.departmentCode) {
+        const { data: dept } = await supabase
+          .from('departments')
+          .select('id')
+          .eq('code', profileData.departmentCode)
+          .single();
+        
+        if (dept) {
+          profileData.department_id = dept.id;
+        }
+        
+        // Remove the temporary field
+        delete profileData.departmentCode;
+        delete profileData.departmentName;
+      }
+      
+      const result = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          ...profileData,
+        })
+        .select();
+      
+      console.log('Profile creation result:', result);
+      return result;
+    },
+
+    upsert: async (userId: string, profileData: any) => {
+      console.log('Upserting profile for user:', userId, 'with data:', profileData);
+      
+      // If department code is provided, find the department ID
+      if (profileData.departmentCode) {
+        const { data: dept } = await supabase
+          .from('departments')
+          .select('id')
+          .eq('code', profileData.departmentCode)
+          .single();
+        
+        if (dept) {
+          profileData.department_id = dept.id;
+        }
+        
+        // Remove the temporary field
+        delete profileData.departmentCode;
+        delete profileData.departmentName;
+      }
+      
+      const result = await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          ...profileData,
+          updated_at: new Date().toISOString(),
+        })
+        .select();
+      
+      console.log('Profile upsert result:', result);
+      return result;
+    },
+
     update: async (userId: string, updates: any) => {
       console.log('Updating profile for user:', userId, 'with data:', updates);
       

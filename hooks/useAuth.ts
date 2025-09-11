@@ -94,20 +94,19 @@ export function useAuth() {
       if (error) throw error;
 
       if (data.user) {
-        // Create profile with all required data
-        const { error: profileError } = await db.profiles.update(data.user.id, {
+        // Create or update profile with all required data
+        const { error: profileError } = await db.profiles.upsert(data.user.id, {
           email,
           full_name: profileData.fullName,
-          student_id: profileData.studentId || null,
-          department_id: profileData.departmentId || null,
           semester: profileData.semester || null,
           section: profileData.section || null,
+          departmentCode: profileData.departmentCode,
           is_faculty: profileData.isFaculty || false,
           is_active: true,
         });
         
         if (profileError) {
-          console.error('Profile creation error:', profileError);
+          console.error('Profile creation/update error:', profileError);
           throw profileError;
         }
       }
